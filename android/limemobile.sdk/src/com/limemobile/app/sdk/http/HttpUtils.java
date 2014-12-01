@@ -1,13 +1,27 @@
 package com.limemobile.app.sdk.http;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.http.cookie.Cookie;
+
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
 public class HttpUtils {
+	protected static final String COOKIE_DATE_FORMAT = "EEE, dd MMM yyyy hh:mm:ss z";
+
 	public static String createUserAgentString(Context applicationContext) {
 		String appName = "";
 		String appVersion = "";
@@ -47,5 +61,50 @@ public class HttpUtils {
 								.getCountry().toLowerCase(), Build.ID,
 						Build.BRAND, width, height, Build.MANUFACTURER,
 						Build.MODEL);
+	}
+
+	public static Bundle getCookiesBundle(List<Cookie> cookies) {
+		Bundle bundle = new Bundle();
+		if (cookies == null) {
+			return bundle;
+		}
+		Calendar calendar = Calendar.getInstance();
+		Map<String, ArrayList<String>> cookiesMap = new HashMap<String, ArrayList<String>>();
+		for (Cookie cookie : cookies) {
+			String domain = cookie.getDomain();
+			if (TextUtils.isEmpty(domain)) {
+				domain = "";
+			}
+			StringBuilder builder = new StringBuilder();
+			builder.append(cookie.getName());
+			builder.append("=");
+			builder.append(cookie.getValue());
+			builder.append("; domain=");
+			builder.append(cookie.getDomain());
+			if (cookie.getExpiryDate() != null) {
+				builder.append("; expires=");
+				calendar.setTime(cookie.getExpiryDate());
+				builder.append(new SimpleDateFormat(COOKIE_DATE_FORMAT)
+						.format(calendar.getTimeInMillis()));
+			}
+			builder.append("; path=");
+			builder.append(cookie.getPath());
+			builder.append("; version=");
+			builder.append(cookie.getVersion());
+			ArrayList<String> list = null;
+			if (cookiesMap.containsKey(domain)) {
+				list = cookiesMap.get(domain);
+				list.add(builder.toString());
+			} else {
+				list = new ArrayList<String>();
+				list.add(builder.toString());
+				cookiesMap.put(domain, list);
+			}
+		}
+		Set<String> keys = cookiesMap.keySet();
+		for (String key : keys) {
+			bundle.putStringArrayList(key, cookiesMap.get(key));
+		}
+		return bundle;
 	}
 }
