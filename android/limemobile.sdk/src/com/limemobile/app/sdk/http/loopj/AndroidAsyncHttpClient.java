@@ -17,153 +17,158 @@ import com.loopj.android.http.RequestHandle;
 import com.loopj.android.http.SyncHttpClient;
 
 public class AndroidAsyncHttpClient {
-	public static final int DEFAULT_MAX_CONNECTIONS = 10;
-	public static final int DEFAULT_CONNECT_TIMEOUT = 15 * 1000;
-	public static final int DEFAULT_RESPONSE_TIMEOUT = 15 * 1000;
-	public static final int DEFAULT_MAX_RETRIES = 3;
-	public static final int DEFAULT_RETRY_SLEEP_TIME_MILLIS = 2000;
+    public static final int DEFAULT_MAX_CONNECTIONS = 10;
+    public static final int DEFAULT_CONNECT_TIMEOUT = 15 * 1000;
+    public static final int DEFAULT_RESPONSE_TIMEOUT = 15 * 1000;
+    public static final int DEFAULT_MAX_RETRIES = 3;
+    public static final int DEFAULT_RETRY_SLEEP_TIME_MILLIS = 2000;
 
-	protected final Context mContext;
-	protected AsyncHttpClient mClient;
-	protected boolean isSync;
-	protected final String mUserAgent;
+    protected final Context mContext;
+    protected AsyncHttpClient mClient;
+    protected boolean isSync;
+    protected final String mUserAgent;
 
-	public AndroidAsyncHttpClient(Context context) {
-		super();
+    public AndroidAsyncHttpClient(Context context) {
+        this(context, false);
+    }
 
-		mContext = context.getApplicationContext();
-		mUserAgent = HttpUtils.createUserAgentString(mContext);
-		isSync = false;
-		initClient();
-	}
+    public AndroidAsyncHttpClient(Context context, boolean isSync) {
+        super();
 
-	public void setAsync(boolean async) {
-		if (isSync != async || mClient == null) {
-			isSync = !async;
-			initClient();
-		}
-	}
+        mContext = context.getApplicationContext();
+        mUserAgent = HttpUtils.createUserAgentString(mContext);
+        this.isSync = isSync;
+        initClient();
+    }
 
-	public List<Cookie> getCookies(String domain) {
-		List<Cookie> cookies = new ArrayList<Cookie>();
-		PersistentCookieStore cookieStore = getCookieStore();
-		if (cookieStore != null) {
-			List<Cookie> allCookies = cookieStore.getCookies();
-			for (Cookie cookie : allCookies) {
-				if (TextUtils.isEmpty(domain) || cookie.getDomain().equals(domain)) {
-					cookies.add(cookie);
-				}
-			}
-		}
-		return cookies;
-	}
+    public void setAsync(boolean async) {
+        if (isSync != async || mClient == null) {
+            isSync = !async;
+            initClient();
+        }
+    }
 
-	public Cookie getCookie(String domain, String name) {
-		if (TextUtils.isEmpty(name)) {
-			throw new IllegalArgumentException();
-		}
-		List<Cookie> cookies = getCookies(domain);
-		if (cookies != null) {
-			for (Cookie cookie : cookies) {
-				if (name.equals(cookie.getName())
-						&& (TextUtils.isEmpty(domain) || domain.equals(cookie
-								.getDomain()))) {
-					return cookie;
-				}
-			}
-		}
-		return null;
-	}
+    public List<Cookie> getCookies(String domain) {
+        List<Cookie> cookies = new ArrayList<Cookie>();
+        PersistentCookieStore cookieStore = getCookieStore();
+        if (cookieStore != null) {
+            List<Cookie> allCookies = cookieStore.getCookies();
+            for (Cookie cookie : allCookies) {
+                if (TextUtils.isEmpty(domain)
+                        || cookie.getDomain().equals(domain)) {
+                    cookies.add(cookie);
+                }
+            }
+        }
+        return cookies;
+    }
 
-	public void clearCookies(String domain) {
-		PersistentCookieStore cookieStore = getCookieStore();
-		if (cookieStore == null) {
-			return;
-		}
-		List<Cookie> cookies = cookieStore.getCookies();
-		for (Cookie cookie : cookies) {
-			if ((TextUtils.isEmpty(domain) || domain.equals(cookie.getDomain()))) {
-				cookieStore.deleteCookie(cookie);
-			}
-		}
-	}
+    public Cookie getCookie(String domain, String name) {
+        if (TextUtils.isEmpty(name)) {
+            throw new IllegalArgumentException();
+        }
+        List<Cookie> cookies = getCookies(domain);
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (name.equals(cookie.getName())
+                        && (TextUtils.isEmpty(domain) || domain.equals(cookie
+                                .getDomain()))) {
+                    return cookie;
+                }
+            }
+        }
+        return null;
+    }
 
-	public void setConnectTimeout(int value) {
-		mClient.setConnectTimeout(value);
-	}
+    public void clearCookies(String domain) {
+        PersistentCookieStore cookieStore = getCookieStore();
+        if (cookieStore == null) {
+            return;
+        }
+        List<Cookie> cookies = cookieStore.getCookies();
+        for (Cookie cookie : cookies) {
+            if ((TextUtils.isEmpty(domain) || domain.equals(cookie.getDomain()))) {
+                cookieStore.deleteCookie(cookie);
+            }
+        }
+    }
 
-	public void setResponseTimeout(int value) {
-		mClient.setResponseTimeout(value);
-	}
+    public void setConnectTimeout(int value) {
+        mClient.setConnectTimeout(value);
+    }
 
-	public void setMaxConnections(int maxConnections) {
-		mClient.setMaxConnections(maxConnections);
-	}
+    public void setResponseTimeout(int value) {
+        mClient.setResponseTimeout(value);
+    }
 
-	public void setMaxRetriesAndTimeout(int retries, int timeout) {
-		mClient.setMaxRetriesAndTimeout(retries, timeout);
-	}
+    public void setMaxConnections(int maxConnections) {
+        mClient.setMaxConnections(maxConnections);
+    }
 
-	public void cancelRequests(final Context context,
-			final boolean mayInterruptIfRunning) {
-		mClient.cancelRequests(context, mayInterruptIfRunning);
-	}
+    public void setMaxRetriesAndTimeout(int retries, int timeout) {
+        mClient.setMaxRetriesAndTimeout(retries, timeout);
+    }
 
-	public void cancelAllRequests(boolean mayInterruptIfRunning) {
-		mClient.cancelAllRequests(mayInterruptIfRunning);
-	}
+    public void cancelRequests(final Context context,
+            final boolean mayInterruptIfRunning) {
+        mClient.cancelRequests(context, mayInterruptIfRunning);
+    }
 
-	public void setProxy(String hostname, int port) {
-		mClient.setProxy(hostname, port);
-	}
+    public void cancelAllRequests(boolean mayInterruptIfRunning) {
+        mClient.cancelAllRequests(mayInterruptIfRunning);
+    }
 
-	public void setProxy(String hostname, int port, String username,
-			String password) {
-		mClient.setProxy(hostname, port, username, password);
-	}
+    public void setProxy(String hostname, int port) {
+        mClient.setProxy(hostname, port);
+    }
 
-	public RequestHandle get(Context context, AndroidAsyncClientRequest request) {
-		return mClient.get(context, request.getUrl(),
-				request.getRequestParams(), request.getResponseHanlder());
-	}
+    public void setProxy(String hostname, int port, String username,
+            String password) {
+        mClient.setProxy(hostname, port, username, password);
+    }
 
-	public RequestHandle post(Context context, AndroidAsyncClientRequest request) {
-		return mClient.post(context, request.getUrl(),
-				request.getRequestParams(), request.getResponseHanlder());
-	}
+    public RequestHandle get(Context context, AndroidAsyncClientRequest request) {
+        return mClient.get(context, request.getUrl(),
+                request.getRequestParams(), request.getResponseHanlder());
+    }
 
-	public RequestHandle put(Context context, AndroidAsyncClientRequest request) {
-		return mClient.post(context, request.getUrl(),
-				request.getRequestParams(), request.getResponseHanlder());
-	}
+    public RequestHandle post(Context context, AndroidAsyncClientRequest request) {
+        return mClient.post(context, request.getUrl(),
+                request.getRequestParams(), request.getResponseHanlder());
+    }
 
-	public RequestHandle delete(Context context,
-			AndroidAsyncClientRequest request) {
-		return mClient.delete(context, request.getUrl(), null,
-				request.getRequestParams(), request.getResponseHanlder());
-	}
+    public RequestHandle put(Context context, AndroidAsyncClientRequest request) {
+        return mClient.post(context, request.getUrl(),
+                request.getRequestParams(), request.getResponseHanlder());
+    }
 
-	private PersistentCookieStore getCookieStore() {
-		return (PersistentCookieStore) mClient.getHttpContext().getAttribute(
-				ClientContext.COOKIE_STORE);
-	}
+    public RequestHandle delete(Context context,
+            AndroidAsyncClientRequest request) {
+        return mClient.delete(context, request.getUrl(), null,
+                request.getRequestParams(), request.getResponseHanlder());
+    }
 
-	private void initClient() {
-		if (isSync) {
-			mClient = new SyncHttpClient(true, 80, 443);
-		} else {
-			mClient = new AsyncHttpClient(true, 80, 443);
-		}
+    private PersistentCookieStore getCookieStore() {
+        return (PersistentCookieStore) mClient.getHttpContext().getAttribute(
+                ClientContext.COOKIE_STORE);
+    }
 
-		mClient.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
-		mClient.setResponseTimeout(DEFAULT_RESPONSE_TIMEOUT);
-		mClient.setMaxConnections(DEFAULT_MAX_CONNECTIONS);
-		mClient.setMaxRetriesAndTimeout(DEFAULT_MAX_RETRIES,
-				DEFAULT_RETRY_SLEEP_TIME_MILLIS);
-		mClient.setThreadPool(Executors.newCachedThreadPool());
-		mClient.setUserAgent(mUserAgent);
+    private void initClient() {
+        if (isSync) {
+            mClient = new SyncHttpClient(true, 80, 443);
+        } else {
+            mClient = new AsyncHttpClient(true, 80, 443);
+        }
 
-		PersistentCookieStore cookieStore = new PersistentCookieStore(mContext);
-		mClient.setCookieStore(cookieStore);
-	}
+        mClient.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
+        mClient.setResponseTimeout(DEFAULT_RESPONSE_TIMEOUT);
+        mClient.setMaxConnections(DEFAULT_MAX_CONNECTIONS);
+        mClient.setMaxRetriesAndTimeout(DEFAULT_MAX_RETRIES,
+                DEFAULT_RETRY_SLEEP_TIME_MILLIS);
+        mClient.setThreadPool(Executors.newCachedThreadPool());
+        mClient.setUserAgent(mUserAgent);
+
+        PersistentCookieStore cookieStore = new PersistentCookieStore(mContext);
+        mClient.setCookieStore(cookieStore);
+    }
 }
