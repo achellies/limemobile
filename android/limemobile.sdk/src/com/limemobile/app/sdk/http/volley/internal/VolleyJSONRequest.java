@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +70,8 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
 		List<Cookie> allCookies = mCookieStore.getCookies();
 		for (Cookie cookie : allCookies) {
 			if (TextUtils.isEmpty(mBasicRequest.getDomain())
-					|| cookie.getDomain().equals(mBasicRequest.getDomain())) {
+					|| (cookie.getDomain() != null && cookie.getDomain()
+							.equals(mBasicRequest.getDomain()))) {
 				mCookies.add(cookie);
 			}
 		}
@@ -80,8 +82,8 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
 
 	@Override
 	public Map<String, String> getHeaders() throws AuthFailureError {
-		Map<String, String> headers = mHeaders != null ? mHeaders : super
-				.getHeaders();
+		Map<String, String> headers = mHeaders != null ? mHeaders
+				: new HashMap<String, String>();
 
 		StringBuilder builder = new StringBuilder();
 		if (headers.containsKey(COOKIE_KEY)) {
@@ -159,21 +161,28 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
 			if (result != null) {
 				if (result instanceof JSONObject) {
 					mBasicJSONResponse.parseResponse((JSONObject) result);
+					return Response.success(jsonObject,
+							HttpHeaderParser.parseCacheHeaders(response));
 				} else if (result instanceof JSONArray) {
 					mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
 					mBasicJSONResponse.setErrorMessage(((JSONArray) result)
 							.toString());
+					return Response.error(new ParseError(response));
 				} else if (result instanceof String) {
 					mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
 					mBasicJSONResponse.setErrorMessage(((String) result));
+					return Response.error(new ParseError(response));
 				} else {
 					mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
 					mBasicJSONResponse.setErrorMessage(result.toString());
+					return Response.error(new ParseError(response));
 				}
+			} else {
+				mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
+				mBasicJSONResponse.setErrorMessage(jsonString);
+				return Response.error(new ParseError(response));
 			}
 
-			return Response.success(jsonObject,
-					HttpHeaderParser.parseCacheHeaders(response));
 		} catch (UnsupportedEncodingException e) {
 			mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
 			mBasicJSONResponse.setErrorMessage(e.toString());
