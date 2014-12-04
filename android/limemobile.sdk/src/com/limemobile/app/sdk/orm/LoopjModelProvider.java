@@ -3,7 +3,6 @@ package com.limemobile.app.sdk.orm;
 import java.util.List;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -20,6 +19,7 @@ import com.path.android.jobqueue.config.Configuration;
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.AbstractDaoMaster;
 import de.greenrobot.dao.AbstractDaoSession;
+import de.greenrobot.dao.Property;
 import de.greenrobot.dao.query.WhereCondition;
 
 public class LoopjModelProvider<T> {
@@ -42,7 +42,6 @@ public class LoopjModelProvider<T> {
 
     protected final Context mContext;
 
-    protected final SQLiteDatabase mDatabase;
     protected final AbstractDaoMaster mDaoMaster;
     protected final AbstractDaoSession mDaoSession;
     protected final AbstractDao<T, Long> mDao;
@@ -56,13 +55,12 @@ public class LoopjModelProvider<T> {
     protected final ModelProviderListener<T> mListener;
 
     @SuppressWarnings("unchecked")
-    public LoopjModelProvider(Context context, SQLiteDatabase db,
-            AbstractDaoMaster daoMaster, Class<T> clazz, Looper looper,
-            GsonModel<T> gson, ModelProviderListener<T> listener) {
+    public LoopjModelProvider(Context context, AbstractDaoMaster daoMaster,
+            Class<T> clazz, Looper looper, GsonModel<T> gson,
+            ModelProviderListener<T> listener) {
         super();
         mContext = context;
 
-        mDatabase = db;
         mDaoMaster = daoMaster;
         mDaoSession = mDaoMaster.newSession();
         mDao = (AbstractDao<T, Long>) mDaoSession.getDao(clazz);
@@ -87,20 +85,50 @@ public class LoopjModelProvider<T> {
      * 
      * Select * from xxx where xxxx Order by xxxx offset xxx limit xxx
      */
+    /**
+     * 
+     * @param context
+     * @param api
+     * @param offset
+     * @param limit
+     * @param orderProperty
+     * @param customOrderForProperty
+     *            DESC or ASC
+     * @param cond
+     * @param condMore
+     */
     public void query(Context context, AndroidAsyncClientRequest api,
-            int offset, int limit, WhereCondition cond,
+            int offset, int limit, Property orderProperty,
+            String customOrderForProperty, WhereCondition cond,
+            WhereCondition... condMore) {
+        queryImpl(context, api, false, offset, limit, orderProperty,
+                customOrderForProperty, cond, condMore);
+    }
+
+    public void queryMore(Context context, AndroidAsyncClientRequest api,
+            int offset, int limit, Property orderProperty,
+            String customOrderForProperty, WhereCondition cond,
+            WhereCondition... condMore) {
+        queryImpl(context, api, true, offset, limit, orderProperty,
+                customOrderForProperty, cond, condMore);
+    }
+
+    protected void queryImpl(Context context, AndroidAsyncClientRequest api,
+            boolean loadMore, int offset, int limit, Property orderProperty,
+            String customOrderForProperty, WhereCondition cond,
             WhereCondition... condMore) {
         sJobManager.addJob(new QueryJob<T>(mContext, PRIORITY_NORMAL, mHandler,
-                mHttpClient, api, mGsonModel, mDao, offset, limit, cond,
-                condMore));
+                mHttpClient, api, mGsonModel, mDao, loadMore, offset, limit,
+                orderProperty, customOrderForProperty, cond, condMore));
     }
 
     public void update(Context context, AndroidAsyncClientRequest api,
-            int offset, int limit, WhereCondition cond,
+            int offset, int limit, Property orderProperty,
+            String customOrderForProperty, WhereCondition cond,
             WhereCondition... condMore) {
         sJobManager.addJob(new UpdateJob<T>(mContext, PRIORITY_NORMAL,
                 mHandler, mHttpClient, api, mGsonModel, mDao, offset, limit,
-                cond, condMore));
+                orderProperty, customOrderForProperty, cond, condMore));
     }
 
     public AbstractDao<T, Long> getDao() {

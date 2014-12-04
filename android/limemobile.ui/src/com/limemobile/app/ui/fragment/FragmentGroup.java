@@ -85,8 +85,11 @@ public abstract class FragmentGroup extends Fragment {
         if (fragment == null) {
             fragment = Fragment.instantiate(getActivity(), clz.getName());
             fragment.setArguments(args);
-            ft.replace(getPrimaryFragmentStubId(fragmentId), fragment,
+            ft.add(getPrimaryFragmentStubId(fragmentId), fragment,
                     mCurrentPrimaryFragmentTag);
+            if (mCurrentPrimaryFragment != null) {
+                ft.hide(mCurrentPrimaryFragment);
+            }
         } else {
             Bundle existedArgs = fragment.getArguments();
             if (existedArgs != null) {
@@ -116,17 +119,22 @@ public abstract class FragmentGroup extends Fragment {
                 mCurrentSecondaryFragmentId);
         mCurrentSecondaryFragmentId = fragmentId;
         if (mCurrentSecondaryFragment != null) {
-            ft.detach(mCurrentSecondaryFragment);
-            if (fragment == mCurrentSecondaryFragment) {
+            if (fragment == mCurrentPrimaryFragment) {
+                ft.detach(mCurrentPrimaryFragment);
                 fragment = null;
+            } else {
+                ft.hide(mCurrentPrimaryFragment);
             }
         }
         Bundle args = getSecondaryFragmentArguments(fragmentId);
         if (fragment == null) {
             fragment = Fragment.instantiate(getActivity(), clz.getName());
             fragment.setArguments(args);
-            ft.replace(getSecondaryFragmentStubId(fragmentId), fragment,
+            ft.add(getSecondaryFragmentStubId(fragmentId), fragment,
                     mCurrentSecondaryFragmentTag);
+            if (mCurrentSecondaryFragment != null) {
+                ft.hide(mCurrentSecondaryFragment);
+            }
         } else {
             Bundle existedArgs = fragment.getArguments();
             if (existedArgs != null) {

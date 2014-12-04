@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-public class GsonModel<T> {
+public abstract class GsonModel<T> {
     protected final Class<T> mClazz;
     protected final Gson mGson;
 
@@ -29,7 +29,9 @@ public class GsonModel<T> {
     }
 
     public T parseObject(String json) {
-        return mGson.fromJson(json, mClazz);
+        T entity = mGson.fromJson(json, mClazz);
+        updateCacheExpiryDate(entity);
+        return entity;
     }
 
     public List<T> parseObjects(JSONObject json) {
@@ -41,7 +43,17 @@ public class GsonModel<T> {
     }
 
     public List<T> parseObjects(String json) {
-        return mGson.fromJson(json, new TypeToken<List<T>>() {
+        List<T> entities = mGson.fromJson(json, new TypeToken<List<T>>() {
         }.getType());
+        updateCacheExpiryDate(entities);
+        return entities;
     }
+
+    protected abstract void updateCacheExpiryDate(T entity);
+
+    protected abstract void updateCacheExpiryDate(List<T> entities);
+
+    public abstract boolean isCacheExpired(T entity);
+
+    public abstract boolean isCacheExpired(List<T> entities);
 }
