@@ -1,6 +1,5 @@
 package com.limemobile.app.sdk.http;
 
-
 public abstract class BasicRequest {
     public static final int DEFAULT_SOCKET_TIMEOUT = 15 * 1000;
     public static final int DEFAULT_MAX_RETRIES = 3;
@@ -40,6 +39,10 @@ public abstract class BasicRequest {
 
     public String getPath() {
         return mPath;
+    }
+
+    public void setShouldCache(boolean shouldCache) {
+        mShouldCache = shouldCache;
     }
 
     public final boolean shouldCache() {

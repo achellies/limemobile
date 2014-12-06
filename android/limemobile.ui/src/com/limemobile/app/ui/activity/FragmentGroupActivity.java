@@ -1,17 +1,16 @@
-package com.limemobile.app.ui.fragment;
+package com.limemobile.app.ui.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
-import android.view.View;
 
-public abstract class FragmentGroup extends Fragment {
+public abstract class FragmentGroupActivity extends ActionBarActivity {
     protected static final int INVALID_FRAGMENT_ID = -1;
     private static final String SAVE_INSTANCE_STATE_PRIMARY_FRAGMENT_TAG = "primary_fragment_tag";
     private static final String SAVE_INSTANCE_STATE_SECONDARY_FRAGMENT_TAG = "secondary_fragment_tag";
-
     private String mCurrentPrimaryFragmentTag;
     protected Fragment mCurrentPrimaryFragment;
 
@@ -54,9 +53,34 @@ public abstract class FragmentGroup extends Fragment {
     protected abstract int getPrimaryFragmentStubId(int fragmentId);
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        mFragmentManager = getChildFragmentManager();
-        super.onViewCreated(view, savedInstanceState);
+    protected void onCreate(Bundle savedInstanceState) {
+        mFragmentManager = getSupportFragmentManager();
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            mCurrentPrimaryFragmentTag = savedInstanceState
+                    .getString(SAVE_INSTANCE_STATE_PRIMARY_FRAGMENT_TAG);
+            if (!TextUtils.isEmpty(mCurrentPrimaryFragmentTag)) {
+                mCurrentPrimaryFragment = mFragmentManager
+                        .findFragmentByTag(mCurrentPrimaryFragmentTag);
+            }
+            mCurrentSecondaryFragmentTag = savedInstanceState
+                    .getString(SAVE_INSTANCE_STATE_SECONDARY_FRAGMENT_TAG);
+            if (!TextUtils.isEmpty(mCurrentSecondaryFragmentTag)) {
+                mCurrentSecondaryFragment = mFragmentManager
+                        .findFragmentByTag(mCurrentSecondaryFragmentTag);
+            }
+        }
+        if (mCurrentPrimaryFragment == null) {
+            initPrimaryFragment();
+        }
+        if (mCurrentSecondaryFragment == null) {
+            initSecondaryFragment();
+        }
+        super.onPostCreate(savedInstanceState);
     }
 
     protected FragmentTransaction beginPrimaryFragmentTransaction(
@@ -75,15 +99,15 @@ public abstract class FragmentGroup extends Fragment {
         mCurrentPrimaryFragmentId = fragmentId;
         if (mCurrentPrimaryFragment != null) {
             if (fragment == mCurrentPrimaryFragment) {
-            	ft.detach(mCurrentPrimaryFragment);
+                ft.detach(mCurrentPrimaryFragment);
                 fragment = null;
             } else {
-            	ft.hide(mCurrentPrimaryFragment);
+                ft.hide(mCurrentPrimaryFragment);
             }
         }
         Bundle args = getPrimaryFragmentArguments(fragmentId);
         if (fragment == null) {
-            fragment = Fragment.instantiate(getActivity(), clz.getName());
+            fragment = Fragment.instantiate(this, clz.getName());
             fragment.setArguments(args);
             ft.add(getPrimaryFragmentStubId(fragmentId), fragment,
                     mCurrentPrimaryFragmentTag);
@@ -128,7 +152,7 @@ public abstract class FragmentGroup extends Fragment {
         }
         Bundle args = getSecondaryFragmentArguments(fragmentId);
         if (fragment == null) {
-            fragment = Fragment.instantiate(getActivity(), clz.getName());
+            fragment = Fragment.instantiate(this, clz.getName());
             fragment.setArguments(args);
             ft.add(getSecondaryFragmentStubId(fragmentId), fragment,
                     mCurrentSecondaryFragmentTag);
@@ -140,14 +164,14 @@ public abstract class FragmentGroup extends Fragment {
             if (existedArgs != null) {
                 existedArgs.putAll(args);
             }
-            ft.attach(fragment);
+            ft.show(fragment);
         }
         mCurrentSecondaryFragment = fragment;
         ft.commitAllowingStateLoss();
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(Bundle outState) {
         outState.putString(SAVE_INSTANCE_STATE_PRIMARY_FRAGMENT_TAG,
                 mCurrentPrimaryFragmentTag);
         outState.putString(SAVE_INSTANCE_STATE_SECONDARY_FRAGMENT_TAG,
@@ -156,34 +180,7 @@ public abstract class FragmentGroup extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            String primaryFragmentTag = savedInstanceState
-                    .getString(SAVE_INSTANCE_STATE_PRIMARY_FRAGMENT_TAG);
-            if (!TextUtils.isEmpty(primaryFragmentTag)) {
-                mCurrentPrimaryFragmentTag = primaryFragmentTag;
-                mCurrentPrimaryFragment = mFragmentManager
-                        .findFragmentByTag(mCurrentPrimaryFragmentTag);
-            }
-            String secondaryFragmentTag = savedInstanceState
-                    .getString(SAVE_INSTANCE_STATE_SECONDARY_FRAGMENT_TAG);
-            if (!TextUtils.isEmpty(secondaryFragmentTag)) {
-                mCurrentSecondaryFragmentTag = secondaryFragmentTag;
-                mCurrentSecondaryFragment = mFragmentManager
-                        .findFragmentByTag(mCurrentSecondaryFragmentTag);
-            }
-        }
-        if (mCurrentPrimaryFragment == null) {
-            initPrimaryFragment();
-        }
-        if (mCurrentSecondaryFragment == null) {
-            initSecondaryFragment();
-        }
-        super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
-    public void onDestroyView() {
+    protected void onDestroy() {
         if (mCurrentPrimaryFragment != null
                 && mCurrentPrimaryFragment.isAdded()) {
             mFragmentManager.beginTransaction().remove(mCurrentPrimaryFragment)
@@ -198,7 +195,7 @@ public abstract class FragmentGroup extends Fragment {
                     .commitAllowingStateLoss();
         }
         mCurrentSecondaryFragment = null;
-        super.onDestroyView();
+        super.onDestroy();
     }
 
     /**

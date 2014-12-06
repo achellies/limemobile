@@ -1,6 +1,7 @@
 package com.limemobile.app.sdk.orm.gson;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -8,7 +9,7 @@ import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonSyntaxException;
 
 public abstract class GsonModel<T> {
     protected final Class<T> mClazz;
@@ -16,6 +17,7 @@ public abstract class GsonModel<T> {
 
     public GsonModel(Class<T> clazz) {
         super();
+
         mClazz = clazz;
 
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -25,33 +27,42 @@ public abstract class GsonModel<T> {
     }
 
     public T parseObject(JSONObject json) {
-        return parseObject(json.toString());
-    }
-
-    public T parseObject(String json) {
-        T entity = mGson.fromJson(json, mClazz);
-        updateCacheExpiryDate(entity);
+        T entity = null;
+        try {
+            entity = mGson.fromJson(json.toString(), mClazz);
+            updateCacheExpiryDate(entity);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+        }
         return entity;
     }
 
     public List<T> parseObjects(JSONObject json) {
-        return parseObjects(json.toString());
+        ArrayList<T> entities = new ArrayList<T>();
+        // TOOD 需要子类来实现
+        return entities;
     }
 
-    public List<T> parseObjects(JSONArray json) {
-        return parseObjects(json.toString());
-    }
-
-    public List<T> parseObjects(String json) {
-        List<T> entities = mGson.fromJson(json, new TypeToken<List<T>>() {
-        }.getType());
-        updateCacheExpiryDate(entities);
+    public List<T> parseObjects(JSONArray jsonArray) {
+        ArrayList<T> entities = new ArrayList<T>();
+        if (jsonArray != null && jsonArray.length() > 0) {
+            int count = jsonArray.length();
+            for (int index = 0; index < count; ++index) {
+                JSONObject json = jsonArray.optJSONObject(index);
+                if (json == null) {
+                    continue;
+                }
+                T entity = parseObject(json);
+                if (entity == null) {
+                    continue;
+                }
+                entities.add(entity);
+            }
+        }
         return entities;
     }
 
     protected abstract void updateCacheExpiryDate(T entity);
-
-    protected abstract void updateCacheExpiryDate(List<T> entities);
 
     public abstract boolean isCacheExpired(T entity);
 
