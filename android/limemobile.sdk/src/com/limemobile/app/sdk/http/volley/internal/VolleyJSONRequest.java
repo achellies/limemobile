@@ -99,7 +99,7 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
                 urlBuilder.append("=");
                 urlBuilder.append(entry.getValue());
                 if (iterator.hasNext()) {
-                    urlBuilder.append("&"); 
+                    urlBuilder.append("&");
                 }
             }
         }
@@ -158,7 +158,9 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
                 String cookieString = headers.get(SET_COOKIE_KEY);
                 if (!TextUtils.isEmpty(cookieString)) {
                     Cookie cookie = parseRawCookie(cookieString);
-                    mCookieStore.addCookie(cookie);
+                    if (cookie != null) {
+                        mCookieStore.addCookie(cookie);
+                    }
                 }
             }
         }

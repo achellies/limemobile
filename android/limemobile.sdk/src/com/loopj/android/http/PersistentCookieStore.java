@@ -84,7 +84,7 @@ public class PersistentCookieStore implements CookieStore {
 
     @Override
     public void addCookie(Cookie cookie) {
-        if (cookie == null || omitNonPersistentCookies && !cookie.isPersistent())
+        if (omitNonPersistentCookies && !cookie.isPersistent())
             return;
         String name = cookie.getName() + cookie.getDomain();
 
