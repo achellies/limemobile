@@ -33,9 +33,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.WindowManager.LayoutParams;
 
+import com.limemobile.app.plugin.internal.IPluginActivityDelegate;
 import com.limemobile.app.plugin.internal.PluginClientManager;
 import com.limemobile.app.plugin.internal.PluginDelegateActivityImpl;
-import com.limemobile.app.plugin.internal.IPluginActivityDelegate;
 
 /**
  * PluginHost中用于代理PluginClient中Activity的生命周期管理Activity，

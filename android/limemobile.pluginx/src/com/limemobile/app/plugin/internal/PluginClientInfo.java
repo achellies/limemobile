@@ -15,6 +15,7 @@
  */
 package com.limemobile.app.plugin.internal;
 
+import android.app.Application;
 import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -26,34 +27,48 @@ import dalvik.system.DexClassLoader;
  * Resources and DexClassLoader.
  */
 public class PluginClientInfo {
-	private String mDefaultActivity;
+    private String mDefaultActivity;
 
-	public final String mPackageName;
-	public final String mPath;
+    public final String mPackageName;
+    public final String mPath;
 
-	public final DexClassLoader mClassLoader;
-	public final AssetManager mAssetManager;
-	public final Resources mResources;
-	public final PackageInfo mClientPackageInfo;
+    public final DexClassLoader mClassLoader;
+    public final AssetManager mAssetManager;
+    public final Resources mResources;
+    public final PackageInfo mClientPackageInfo;
 
-	public PluginClientInfo(String packageName, String path,
-			DexClassLoader loader, AssetManager assetManager,
-			Resources resources, PackageInfo packageInfo) {
-		this.mPackageName = packageName;
-		this.mPath = path;
-		this.mClassLoader = loader;
-		this.mAssetManager = assetManager;
-		this.mResources = resources;
-		this.mClientPackageInfo = packageInfo;
-	}
+    protected Application mApplication;
 
-	public String getDefaultActivity() {
-		if (TextUtils.isEmpty(mDefaultActivity)) {
-			if (mClientPackageInfo.activities != null
-					&& mClientPackageInfo.activities.length > 0) {
-				mDefaultActivity = mClientPackageInfo.activities[0].name;
-			}
-		}
-		return mDefaultActivity;
-	}
+    public PluginClientInfo(String packageName, String path,
+            DexClassLoader loader, AssetManager assetManager,
+            Resources resources, PackageInfo packageInfo) {
+        this.mPackageName = packageName;
+        this.mPath = path;
+        this.mClassLoader = loader;
+        this.mAssetManager = assetManager;
+        this.mResources = resources;
+        this.mClientPackageInfo = packageInfo;
+    }
+
+    public boolean isApplicationInited() {
+        return mApplication != null;
+    }
+
+    public Application getApplication() {
+        return mApplication;
+    }
+
+    public void setApplication(Application application) {
+        mApplication = application;
+    }
+
+    public String getDefaultActivity() {
+        if (TextUtils.isEmpty(mDefaultActivity)) {
+            if (mClientPackageInfo.activities != null
+                    && mClientPackageInfo.activities.length > 0) {
+                mDefaultActivity = mClientPackageInfo.activities[0].name;
+            }
+        }
+        return mDefaultActivity;
+    }
 }

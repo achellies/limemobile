@@ -13,8 +13,35 @@
         android:theme="@style/AppTheme" >
     </application>
 
-    <activity android:name="com.limemobile.app.plugin.PluginHostDelegateActivity" />
-    <activity android:name="com.limemobile.app.plugin.PluginHostDelegateFragmentActivity" />
+    <service
+        android:name="com.limemobile.app.plugin.PluginHostAIDLService"
+        android:exported="true" />
+
+    <!-- HostDelegete Activity的Theme中不能用Host和Client的相关资源 -->
+    <activity
+        android:name="com.limemobile.app.plugin.PluginHostDelegateActivity"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.Plugin.NoTitleBar" />
+    <activity
+        android:name="com.limemobile.app.plugin.PluginHostDelegateFragmentActivity"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.Plugin.NoTitleBar" />
+    <activity
+        android:name="com.limemobile.app.plugin.PluginHostDelegateDialogActivity"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.Plugin.Dialog" />
+    <activity
+        android:name="com.limemobile.app.plugin.PluginHostDelegateDialogFragmentActivity"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.Plugin.Dialog" />
+    <activity
+        android:name="com.limemobile.app.plugin.PluginHostDelegateTransparentActivity"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.Plugin.Translucent.NoTitleBar" />
+    <activity
+        android:name="com.limemobile.app.plugin.PluginHostDelegateTransparentFragmentActivity"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.Plugin.Translucent.NoTitleBar" />
 
     <service android:name="com.limemobile.app.plugin.PluginHostDelegateService" />
 
