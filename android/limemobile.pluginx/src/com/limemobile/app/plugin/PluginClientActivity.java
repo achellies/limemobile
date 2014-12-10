@@ -431,6 +431,7 @@ public class PluginClientActivity extends Activity implements IPluginActivity {
 	public void startActivity(Intent intent) {
 		if (mProxyActivity == null) {
 			super.startActivity(intent);
+			return;
 		}
 
 		List<ResolveInfo> resolveInfos = mContext.getPackageManager()
@@ -449,6 +450,7 @@ public class PluginClientActivity extends Activity implements IPluginActivity {
 	public void startActivity(Intent intent, Bundle options) {
 		if (mProxyActivity == null) {
 			super.startActivity(intent, options);
+			return;
 		}
 
 		List<ResolveInfo> resolveInfos = mContext.getPackageManager()

@@ -227,6 +227,7 @@ public class PluginHostDelegateActivity extends Activity implements
 			intent.setPackage(mDelegatedActivity.getPackageName());
 		} else {
 			super.startActivity(intent);
+			return;
 		}
 		PluginClientManager.sharedInstance(this).startActivity(this, intent);
 	}
