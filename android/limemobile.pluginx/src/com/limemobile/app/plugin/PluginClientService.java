@@ -1,9 +1,12 @@
 package com.limemobile.app.plugin;
 
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Looper;
@@ -100,6 +103,30 @@ public abstract class PluginClientService extends Service implements
         } else {
             return mPluginPackage.mPackageName;
         }
+    }
+
+    @Override
+    public AssetManager getAssets() {
+        if (mProxyService == null) {
+            return super.getAssets();
+        }
+        return mProxyService.getAssets();
+    }
+
+    @Override
+    public ContentResolver getContentResolver() {
+        if (mProxyService == null) {
+            return super.getContentResolver();
+        }
+        return mProxyService.getContentResolver();
+    }
+
+    @Override
+    public ApplicationInfo getApplicationInfo() {
+        if (mProxyService == null) {
+            return super.getApplicationInfo();
+        }
+        return mProxyService.getApplicationInfo();
     }
 
     @Override
