@@ -32,17 +32,21 @@ public interface IPluginActivity {
 	public void setDelegate(Activity pluginHostActivity,
 			PluginClientInfo pluginPackage);
 
-	public void onCreate(Bundle savedInstanceState);
+    public void onCreate(Bundle savedInstanceState);
 
-	public void onStart();
+    public void onPostCreate(Bundle savedInstanceState);
 
-	public void onRestart();
+    public void onStart();
 
-	public void onActivityResult(int requestCode, int resultCode, Intent data);
+    public void onRestart();
 
-	public void onResume();
+    public void onActivityResult(int requestCode, int resultCode, Intent data);
 
-	public void onPause();
+    public void onResume();
+
+    public void onPostResume();
+
+    public void onPause();
 
 	public void onStop();
 

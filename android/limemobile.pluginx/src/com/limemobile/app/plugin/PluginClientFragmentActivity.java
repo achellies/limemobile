@@ -70,6 +70,13 @@ public class PluginClientFragmentActivity extends FragmentActivity implements
     }
 
     @Override
+    public void onPostCreate(Bundle savedInstanceState) {
+        if (mProxyActivity == null) {
+            super.onPostCreate(savedInstanceState);
+        }
+    }
+
+    @Override
     public void setContentView(View view) {
         if (mProxyActivity == null) {
             super.setContentView(view);
@@ -283,6 +290,13 @@ public class PluginClientFragmentActivity extends FragmentActivity implements
     public void onResume() {
         if (mProxyActivity == null) {
             super.onResume();
+        }
+    }
+
+    @Override
+    public void onPostResume() {
+        if (mProxyActivity == null) {
+            super.onPostResume();
         }
     }
 

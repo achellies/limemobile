@@ -62,11 +62,15 @@ public class PluginHostDelegateActivity extends Activity implements
 		mDelegatedActivity = delegatedActivity;
 	}
 
-	@Override
-	public AssetManager getAssets() {
-		return mDelegateImpl.getAssets() == null ? super.getAssets()
-				: mDelegateImpl.getAssets();
-	}
+    public IPluginActivity getRemoteActivity() {
+        return mDelegatedActivity;
+    }
+
+    @Override
+    public AssetManager getAssets() {
+        return mDelegateImpl.getAssets() == null ? super.getAssets()
+                : mDelegateImpl.getAssets();
+    }
 
 	@Override
 	public Resources getResources() {
@@ -85,11 +89,23 @@ public class PluginHostDelegateActivity extends Activity implements
 		return mDelegateImpl.getClassLoader();
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		mDelegatedActivity.onActivityResult(requestCode, resultCode, data);
-		super.onActivityResult(requestCode, resultCode, data);
-	}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mDelegatedActivity.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        mDelegatedActivity.onPostCreate(savedInstanceState);
+        super.onPostCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onPostResume() {
+        mDelegatedActivity.onPostResume();
+        super.onPostResume();
+    }
 
 	@Override
 	protected void onStart() {
@@ -163,11 +179,13 @@ public class PluginHostDelegateActivity extends Activity implements
 		return mDelegatedActivity.onKeyUp(keyCode, event);
 	}
 
-	@Override
-	public void onWindowAttributesChanged(LayoutParams params) {
-		mDelegatedActivity.onWindowAttributesChanged(params);
-		super.onWindowAttributesChanged(params);
-	}
+    @Override
+    public void onWindowAttributesChanged(LayoutParams params) {
+        if (mDelegatedActivity != null) {
+            mDelegatedActivity.onWindowAttributesChanged(params);
+        }
+        super.onWindowAttributesChanged(params);
+    }
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
