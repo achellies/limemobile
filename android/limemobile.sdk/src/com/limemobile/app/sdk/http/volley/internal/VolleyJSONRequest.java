@@ -219,6 +219,21 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
     }
 
     @Override
+    protected VolleyError parseNetworkError(VolleyError volleyError) {
+        if (volleyError.networkResponse == null) {
+            mBasicJSONResponse = new BasicJSONResponse(
+                    BasicJSONResponse.FAILED, new HashMap<String, String>());
+        } else {
+            mBasicJSONResponse = new BasicJSONResponse(
+                    volleyError.networkResponse.statusCode,
+                    volleyError.networkResponse.headers);
+        }
+        mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
+        mBasicJSONResponse.setErrorMessage(volleyError.getMessage());
+        return volleyError;
+    }
+
+    @Override
     public int getCurrentTimeout() {
         return mBasicRequest.getTimeoutMs();
     }
