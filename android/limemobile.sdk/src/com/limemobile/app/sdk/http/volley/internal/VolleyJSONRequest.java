@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.http.Header;
+import org.apache.http.HttpStatus;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.json.JSONArray;
@@ -46,6 +47,29 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
     protected final PersistentCookieStore mCookieStore;
     protected final List<Cookie> mCookies = new ArrayList<Cookie>();
 
+    protected String mRedirectUrl;
+
+    /** The current timeout in milliseconds. */
+    private int mCurrentTimeoutMs;
+
+    /** The current retry count. */
+    private int mCurrentRetryCount;
+
+    /** The maximum number of attempts. */
+    private final int mMaxNumRetries;
+
+    /** The backoff multiplier for for the policy. */
+    private final float mBackoffMultiplier;
+
+    /** The default socket timeout in milliseconds */
+    public static final int DEFAULT_TIMEOUT_MS = 2500;
+
+    /** The default number of retries */
+    public static final int DEFAULT_MAX_RETRIES = 1;
+
+    /** The default backoff multiplier */
+    public static final float DEFAULT_BACKOFF_MULT = 1f;
+
     public VolleyJSONRequest(int method, Map<String, String> headers,
             VolleyClientRequest request, PersistentCookieStore cookieStore) {
         super(method, request.getUrl(), new ErrorListener() {
@@ -57,6 +81,10 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
         this.mBasicRequest = request;
         this.mHeaders = headers;
         this.mCookieStore = cookieStore;
+
+        this.mCurrentTimeoutMs = mBasicRequest.getTimeoutMs();
+        this.mMaxNumRetries = mBasicRequest.getRetryCount();
+        this.mBackoffMultiplier = DEFAULT_BACKOFF_MULT;
 
         List<Cookie> allCookies = mCookieStore.getCookies();
         for (Cookie cookie : allCookies) {
@@ -78,6 +106,9 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
 
     @Override
     public String getUrl() {
+        if (!TextUtils.isEmpty(mRedirectUrl)) {
+            return mRedirectUrl;
+        }
         String url = mBasicRequest.getUrl();
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(url);
@@ -229,22 +260,46 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
                     volleyError.networkResponse.headers);
         }
         mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
-        mBasicJSONResponse.setErrorMessage(volleyError.getMessage());
+        mBasicJSONResponse.setErrorMessage(volleyError.toString());
         return volleyError;
     }
 
     @Override
     public int getCurrentTimeout() {
-        return mBasicRequest.getTimeoutMs();
+        return mCurrentTimeoutMs;
     }
 
     @Override
     public int getCurrentRetryCount() {
-        return mBasicRequest.getRetryCount();
+        return mCurrentRetryCount;
     }
 
     @Override
     public void retry(VolleyError error) throws VolleyError {
+        mCurrentRetryCount++;
+        mCurrentTimeoutMs += (mCurrentTimeoutMs * mBackoffMultiplier);
+        if (!hasAttemptRemaining()) {
+            throw error;
+        }
+        if (error.networkResponse != null) {
+            int statusCode = error.networkResponse.statusCode;
+            if (statusCode == HttpStatus.SC_UNAUTHORIZED
+                    || statusCode == HttpStatus.SC_FORBIDDEN) {
+                throw error;
+            }
+
+            if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY
+                    || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+                String url = error.networkResponse.headers.get("location");
+                if (!TextUtils.isEmpty(url)) {
+                    mRedirectUrl = url;
+                }
+            }
+        }
+    }
+
+    protected boolean hasAttemptRemaining() {
+        return mCurrentRetryCount <= mMaxNumRetries;
     }
 
     protected BasicJSONResponse parseJSONResponse(int statusCode,
