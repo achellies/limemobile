@@ -128,24 +128,48 @@ public class VolleyClient {
         mRequestQueue.cancelAll(tag);
     }
 
-    public Request<JSONObject> get(Context context, VolleyClientRequest request) {
+   public Request<JSONObject> get(Context context, VolleyClientRequest request) {
+        return get(context, request, null);
+    }
+
+    public Request<JSONObject> get(Context context,
+            VolleyClientRequest request, Map<String, String> headers) {
         return mRequestQueue.add(new VolleyJSONRequest(Request.Method.GET,
-                null, request, mCookieStore));
+                headers, request, mCookieStore));
     }
 
     public Request<JSONObject> post(Context context, VolleyClientRequest request) {
+        return post(context, request, null);
+    }
+
+    public Request<JSONObject> post(Context context,
+            VolleyClientRequest request, Map<String, String> headers) {
         return mRequestQueue.add(new VolleyJSONRequest(Request.Method.POST,
-                null, request, mCookieStore));
+                headers, request, mCookieStore));
     }
 
     public Request<JSONObject> put(Context context, VolleyClientRequest request) {
+        return put(context, request, null);
+    }
+
+    public Request<JSONObject> put(Context context,
+            VolleyClientRequest request, Map<String, String> headers) {
         return mRequestQueue.add(new VolleyJSONRequest(Request.Method.PUT,
-                null, request, mCookieStore));
+                headers, request, mCookieStore));
     }
 
     public Request<JSONObject> delete(Context context,
             VolleyClientRequest request) {
+        return delete(context, request, null);
+    }
+
+    public Request<JSONObject> delete(Context context,
+            VolleyClientRequest request, Map<String, String> headers) {
         return mRequestQueue.add(new VolleyJSONRequest(Request.Method.DELETE,
-                null, request, mCookieStore));
+                headers, request, mCookieStore));
+    }
+
+    public final RequestQueue getRequestQueue() {
+        return mRequestQueue;
     }
 }
