@@ -144,7 +144,7 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
 
         StringBuilder builder = new StringBuilder();
         if (headers.containsKey(COOKIE_KEY)) {
-            builder.append("; ");
+            // builder.append("; ");
             builder.append(headers.get(COOKIE_KEY));
         }
         for (Cookie cookie : mCookies) {
