@@ -167,6 +167,10 @@ public class PluginClientManager {
                 }
             }
         }
+        if (pluginPackage.mApplication.getClass().isAssignableFrom(
+                PluginClientApplication.class)) {
+            ((PluginClientApplication) pluginPackage.mApplication).onDestroy();
+        }
         mPluginClientPackages.remove(packageName);
         mPluginClientDexPaths.remove(packageName);
     }
