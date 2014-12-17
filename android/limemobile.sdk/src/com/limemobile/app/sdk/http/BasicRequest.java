@@ -65,4 +65,7 @@ public abstract class BasicRequest {
 
         return stringBuilder.toString();
     }
+
+    public void parseResponse(BasicJSONResponse response)throws JSONException {
+    }
 }
