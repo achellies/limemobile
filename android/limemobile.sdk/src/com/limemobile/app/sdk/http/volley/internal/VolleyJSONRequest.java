@@ -219,7 +219,17 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
             }
             if (result != null) {
                 if (result instanceof JSONObject) {
-                    mBasicJSONResponse.parseResponse((JSONObject) result);
+                    jsonObject = (JSONObject) result;
+                    mBasicJSONResponse.setResponseJSONObject(jsonObject);
+                    if (mBasicRequest != null) {
+                        try {
+                            mBasicRequest.parseResponse(mBasicJSONResponse);
+                        } catch (JSONException e) {
+                            mBasicJSONResponse
+                                    .setErrorCode(BasicJSONResponse.FAILED);
+                            mBasicJSONResponse.setErrorMessage(e.toString());
+                        }
+                    }
                     return Response.success(jsonObject,
                             HttpHeaderParser.parseCacheHeaders(response));
                 } else if (result instanceof JSONArray) {
