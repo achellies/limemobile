@@ -228,10 +228,14 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
                             mBasicJSONResponse
                                     .setErrorCode(BasicJSONResponse.FAILED);
                             mBasicJSONResponse.setErrorMessage(e.toString());
+                            return Response.error(new ParseError(response));
                         }
+                        return Response.success(jsonObject,
+                                HttpHeaderParser.parseCacheHeaders(response));
+                    } else {
+                        return Response.success(jsonObject,
+                                HttpHeaderParser.parseCacheHeaders(response));
                     }
-                    return Response.success(jsonObject,
-                            HttpHeaderParser.parseCacheHeaders(response));
                 } else if (result instanceof JSONArray) {
                     mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
                     mBasicJSONResponse.setErrorMessage(((JSONArray) result)
