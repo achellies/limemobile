@@ -254,13 +254,24 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
         if (volleyError.networkResponse == null) {
             mBasicJSONResponse = new BasicJSONResponse(
                     BasicJSONResponse.FAILED, new HashMap<String, String>());
+            mBasicJSONResponse.setErrorMessage(volleyError.toString());
         } else {
+            String responseString = null;
+            try {
+                responseString = new String(
+                        volleyError.networkResponse.data,
+                        HttpHeaderParser
+                                .parseCharset(volleyError.networkResponse.headers));
+            } catch (UnsupportedEncodingException e) {
+            }
             mBasicJSONResponse = new BasicJSONResponse(
                     volleyError.networkResponse.statusCode,
                     volleyError.networkResponse.headers);
+            mBasicJSONResponse.setErrorMessage(String.format(
+                    "statusCode = %d, response = %s",
+                    volleyError.networkResponse.statusCode, responseString));
         }
         mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
-        mBasicJSONResponse.setErrorMessage(volleyError.toString());
         return volleyError;
     }
 
