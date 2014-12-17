@@ -70,21 +70,8 @@ public class BasicJSONResponse {
 		return mHeaders;
 	}
 
-	public void parseResponse(JSONObject json) {
+	public void setResponseJSONObject(JSONObject json) {
 		this.mJSONObject = json;
-		try {
-			this.parseJSON();
-			mErrorCode = SUCCESS;
-		} catch (JSONException e) {
-			mErrorCode = FAILED;
-			if (e != null) {
-				mErrorMessage = e.toString();
-			}
-		}
-	}
-
-	protected void parseJSON() throws JSONException {
-		// do nothing
 	}
 
 	/**
