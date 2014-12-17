@@ -136,7 +136,8 @@ public class PluginClientManager {
         final String packageName = packageInfo.packageName;
         PluginClientInfo pluginPackage = mPluginClientPackages.get(packageName);
         if (pluginPackage == null) {
-            DexClassLoader dexClassLoader = createDexClassLoader(dexPath);
+            DexClassLoader dexClassLoader = createDexClassLoader(dexPath,
+                    packageInfo.packageName, packageInfo.versionName);
             AssetManager assetManager = createAssetManager(dexPath);
             Resources resources = createResources(assetManager);
             pluginPackage = new PluginClientInfo(packageName, dexPath,
@@ -175,8 +176,12 @@ public class PluginClientManager {
         mPluginClientDexPaths.remove(packageName);
     }
 
-    private DexClassLoader createDexClassLoader(String dexPath) {
+    private DexClassLoader createDexClassLoader(String dexPath,
+            String packageName, String version) {
         File dexOutputDir = mContext.getDir("dex", Context.MODE_PRIVATE);
+        dexOutputDir = new File(dexOutputDir, String.format("/%s/%s/",
+                packageName, version));
+        dexOutputDir.mkdirs();
         final String dexOutputPath = dexOutputDir.getAbsolutePath();
         PluginClientDexClassLoader loader = new PluginClientDexClassLoader(
                 dexPath, dexOutputPath, null, mContext.getClassLoader());
