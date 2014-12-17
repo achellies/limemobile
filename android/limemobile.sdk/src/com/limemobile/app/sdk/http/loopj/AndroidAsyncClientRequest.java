@@ -27,9 +27,15 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                     JSONObject json) {
                 // super.onSuccess(statusCode, headers, json);
                 if (mListener != null) {
-                    BasicJSONResponse response = parseJSONResponse(statusCode,
+                    BasicJSONResponse response = constructJSONResponse(statusCode,
                             headers);
-                    response.parseResponse(json);
+                    response.setResponseJSONObject(json);
+                    try {
+                        parseResponse(response);
+                    } catch (JSONException e) {
+                        response.setErrorCode(BasicJSONResponse.FAILED);
+                        response.setErrorMessage(e.toString());
+                    }
                     mListener.onResponse(response);
                 }
             }
@@ -39,7 +45,7 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                     JSONArray jsonArray) {
                 // super.onSuccess(statusCode, headers, jsonArray);
                 if (mListener != null) {
-                    BasicJSONResponse response = parseJSONResponse(statusCode,
+                    BasicJSONResponse response = constructJSONResponse(statusCode,
                             headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(jsonArray.toString());
@@ -53,7 +59,7 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                 // super.onFailure(statusCode, headers, throwable,
                 // errorResponse);
                 if (mListener != null) {
-                    BasicJSONResponse response = parseJSONResponse(statusCode,
+                    BasicJSONResponse response = constructJSONResponse(statusCode,
                             headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(throwable.toString());
@@ -67,7 +73,7 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                 // super.onFailure(statusCode, headers, throwable,
                 // errorResponse);
                 if (mListener != null) {
-                    BasicJSONResponse response = parseJSONResponse(statusCode,
+                    BasicJSONResponse response = constructJSONResponse(statusCode,
                             headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(throwable.toString());
@@ -81,7 +87,7 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                 // super.onFailure(statusCode, headers, responseString,
                 // throwable);
                 if (mListener != null) {
-                    BasicJSONResponse response = parseJSONResponse(statusCode,
+                    BasicJSONResponse response = constructJSONResponse(statusCode,
                             headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(throwable.toString());
@@ -94,7 +100,7 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                     String responseString) {
                 // super.onSuccess(statusCode, headers, responseString);
                 if (mListener != null) {
-                    BasicJSONResponse response = parseJSONResponse(statusCode,
+                    BasicJSONResponse response = constructJSONResponse(statusCode,
                             headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(responseString);
@@ -109,7 +115,7 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
         return mResponseHandler;
     }
 
-    protected BasicJSONResponse parseJSONResponse(int statusCode,
+    protected BasicJSONResponse constructJSONResponse(int statusCode,
             Header[] headers) {
         BasicJSONResponse response = new BasicJSONResponse(statusCode, headers);
         return response;
