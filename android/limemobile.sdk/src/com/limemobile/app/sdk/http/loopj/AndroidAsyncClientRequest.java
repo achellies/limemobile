@@ -2,6 +2,7 @@ package com.limemobile.app.sdk.http.loopj;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.limemobile.app.sdk.http.BasicJSONResponse;
@@ -27,11 +28,11 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                     JSONObject json) {
                 // super.onSuccess(statusCode, headers, json);
                 if (mListener != null) {
-                    BasicJSONResponse response = constructJSONResponse(statusCode,
-                            headers);
+                    BasicJSONResponse response = constructJSONResponse(
+                            statusCode, headers);
                     response.setResponseJSONObject(json);
                     try {
-                        parseResponse(response);
+                        AndroidAsyncClientRequest.this.parseResponse(response);
                     } catch (JSONException e) {
                         response.setErrorCode(BasicJSONResponse.FAILED);
                         response.setErrorMessage(e.toString());
@@ -45,8 +46,8 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                     JSONArray jsonArray) {
                 // super.onSuccess(statusCode, headers, jsonArray);
                 if (mListener != null) {
-                    BasicJSONResponse response = constructJSONResponse(statusCode,
-                            headers);
+                    BasicJSONResponse response = constructJSONResponse(
+                            statusCode, headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(jsonArray.toString());
                     mListener.onResponse(response);
@@ -59,8 +60,8 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                 // super.onFailure(statusCode, headers, throwable,
                 // errorResponse);
                 if (mListener != null) {
-                    BasicJSONResponse response = constructJSONResponse(statusCode,
-                            headers);
+                    BasicJSONResponse response = constructJSONResponse(
+                            statusCode, headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(throwable.toString());
                     mListener.onResponse(response);
@@ -73,8 +74,8 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                 // super.onFailure(statusCode, headers, throwable,
                 // errorResponse);
                 if (mListener != null) {
-                    BasicJSONResponse response = constructJSONResponse(statusCode,
-                            headers);
+                    BasicJSONResponse response = constructJSONResponse(
+                            statusCode, headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(throwable.toString());
                     mListener.onResponse(response);
@@ -87,8 +88,8 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                 // super.onFailure(statusCode, headers, responseString,
                 // throwable);
                 if (mListener != null) {
-                    BasicJSONResponse response = constructJSONResponse(statusCode,
-                            headers);
+                    BasicJSONResponse response = constructJSONResponse(
+                            statusCode, headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(throwable.toString());
                     mListener.onResponse(response);
@@ -100,8 +101,8 @@ public abstract class AndroidAsyncClientRequest extends BasicRequest {
                     String responseString) {
                 // super.onSuccess(statusCode, headers, responseString);
                 if (mListener != null) {
-                    BasicJSONResponse response = constructJSONResponse(statusCode,
-                            headers);
+                    BasicJSONResponse response = constructJSONResponse(
+                            statusCode, headers);
                     response.setErrorCode(BasicJSONResponse.FAILED);
                     response.setErrorMessage(responseString);
                     mListener.onResponse(response);

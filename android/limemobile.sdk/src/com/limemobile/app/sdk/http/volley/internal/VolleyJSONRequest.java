@@ -179,7 +179,7 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
     }
 
     @Override
-    protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+    public Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
         int statusCode = response.statusCode;
         Map<String, String> headers = response.headers;
         mBasicJSONResponse = new BasicJSONResponse(statusCode, headers);
@@ -264,7 +264,7 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
     }
 
     @Override
-    protected VolleyError parseNetworkError(VolleyError volleyError) {
+    public VolleyError parseNetworkError(VolleyError volleyError) {
         if (volleyError.networkResponse == null) {
             mBasicJSONResponse = new BasicJSONResponse(
                     BasicJSONResponse.FAILED, new HashMap<String, String>());
@@ -391,5 +391,9 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
         }
 
         return cookie;
+    }
+
+    public BasicJSONResponse getJSONResponse() {
+        return mBasicJSONResponse;
     }
 }

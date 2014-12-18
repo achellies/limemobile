@@ -1,5 +1,7 @@
 package com.limemobile.app.sdk.http;
 
+import org.json.JSONException;
+
 public abstract class BasicRequest {
     public static final int DEFAULT_SOCKET_TIMEOUT = 15 * 1000;
     public static final int DEFAULT_MAX_RETRIES = 3;
@@ -66,6 +68,6 @@ public abstract class BasicRequest {
         return stringBuilder.toString();
     }
 
-    public void parseResponse(BasicJSONResponse response)throws JSONException {
+    public void parseResponse(BasicJSONResponse response) throws JSONException {
     }
 }

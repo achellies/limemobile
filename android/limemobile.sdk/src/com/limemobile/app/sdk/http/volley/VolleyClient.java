@@ -3,6 +3,7 @@ package com.limemobile.app.sdk.http.volley;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.cookie.Cookie;
 import org.json.JSONObject;
@@ -13,13 +14,17 @@ import android.os.Build;
 import android.text.TextUtils;
 
 import com.android.volley.Network;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
+import com.limemobile.app.sdk.http.BasicJSONResponse;
 import com.limemobile.app.sdk.http.HttpUtils;
 import com.limemobile.app.sdk.http.volley.internal.VolleyJSONRequest;
 import com.loopj.android.http.PersistentCookieStore;
@@ -67,19 +72,7 @@ public class VolleyClient {
         mCookieStore = new PersistentCookieStore(mContext);
 
         File cacheDir = new File(context.getCacheDir(), "volley");
-
-        HttpStack stack;
-        if (Build.VERSION.SDK_INT >= 9) {
-            stack = new HurlStack();
-        } else {
-            // Prior to Gingerbread, HttpUrlConnection was unreliable.
-            // See:
-            // http://android-developers.blogspot.com/2011/09/androids-http-clients.html
-            stack = new HttpClientStack(
-                    AndroidHttpClient.newInstance(mUserAgent));
-        }
-
-        Network network = new BasicNetwork(stack);
+        Network network = buildNetwork(context);
 
         mRequestQueue = new RequestQueue(new DiskBasedCache(cacheDir), network);
         mRequestQueue.start();
@@ -128,7 +121,7 @@ public class VolleyClient {
         mRequestQueue.cancelAll(tag);
     }
 
-   public Request<JSONObject> get(Context context, VolleyClientRequest request) {
+    public Request<JSONObject> get(Context context, VolleyClientRequest request) {
         return get(context, request, null);
     }
 
@@ -169,7 +162,97 @@ public class VolleyClient {
                 headers, request, mCookieStore));
     }
 
+    public BasicJSONResponse getSync(Context context,
+            VolleyClientRequest request) {
+        return getSync(context, request, null);
+    }
+
+    public BasicJSONResponse getSync(Context context,
+            VolleyClientRequest request, Map<String, String> headers) {
+        return excuteSync(context, new VolleyJSONRequest(Request.Method.GET,
+                headers, request, mCookieStore));
+    }
+
+    public BasicJSONResponse postSync(Context context,
+            VolleyClientRequest request) {
+        return postSync(context, request, null);
+    }
+
+    public BasicJSONResponse postSync(Context context,
+            VolleyClientRequest request, Map<String, String> headers) {
+        return excuteSync(context, new VolleyJSONRequest(Request.Method.POST,
+                headers, request, mCookieStore));
+    }
+
+    public BasicJSONResponse putSync(Context context,
+            VolleyClientRequest request) {
+        return putSync(context, request, null);
+    }
+
+    public BasicJSONResponse putSync(Context context,
+            VolleyClientRequest request, Map<String, String> headers) {
+        return excuteSync(context, new VolleyJSONRequest(Request.Method.PUT,
+                headers, request, mCookieStore));
+    }
+
+    public BasicJSONResponse deleteSync(Context context,
+            VolleyClientRequest request) {
+        return deleteSync(context, request, null);
+    }
+
+    public BasicJSONResponse deleteSync(Context context,
+            VolleyClientRequest request, Map<String, String> headers) {
+        return excuteSync(context, new VolleyJSONRequest(Request.Method.DELETE,
+                headers, request, mCookieStore));
+    }
+
+    private BasicJSONResponse excuteSync(Context context,
+            VolleyJSONRequest request) {
+
+        Network network = buildNetwork(context);
+
+        try {
+            request.addMarker("network-queue-take");
+
+            // Perform the network request.
+            NetworkResponse networkResponse = network.performRequest(request);
+            request.addMarker("network-http-complete");
+
+            // Parse the response here on the worker thread.
+            @SuppressWarnings("unused")
+            Response<?> response = request
+                    .parseNetworkResponse(networkResponse);
+            request.addMarker("network-parse-complete");
+
+            // Post the response back.
+            request.markDelivered();
+        } catch (VolleyError volleyError) {
+            request.parseNetworkError(volleyError);
+        } catch (Exception e) {
+            request.parseNetworkError(new VolleyError(e));
+        }
+
+        return request.getJSONResponse();
+    }
+
     public final RequestQueue getRequestQueue() {
         return mRequestQueue;
+    }
+
+    private Network buildNetwork(Context context) {
+
+        HttpStack stack;
+        if (Build.VERSION.SDK_INT >= 9) {
+            stack = new HurlStack();
+        } else {
+            // Prior to Gingerbread, HttpUrlConnection was unreliable.
+            // See:
+            // http://android-developers.blogspot.com/2011/09/androids-http-clients.html
+            stack = new HttpClientStack(
+                    AndroidHttpClient.newInstance(mUserAgent));
+        }
+
+        Network network = new BasicNetwork(stack);
+        return network;
     }
 }
