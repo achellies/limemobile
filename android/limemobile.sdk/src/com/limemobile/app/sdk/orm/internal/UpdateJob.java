@@ -2,10 +2,13 @@ package com.limemobile.app.sdk.orm.internal;
 
 import java.util.List;
 
+import org.apache.http.Header;
+
 import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
 
+import com.limemobile.app.sdk.R;
 import com.limemobile.app.sdk.http.BasicJSONResponse;
 import com.limemobile.app.sdk.http.HttpUtils;
 import com.limemobile.app.sdk.http.JSONResponseListener;
@@ -83,11 +86,15 @@ public class UpdateJob<T> extends Job {
     public void onRun() throws Throwable {
         // Job logic goes here.
         if (!HttpUtils.isNetworkAvaliable(mContext)) {
+            BasicJSONResponse response = new BasicJSONResponse(
+                    BasicJSONResponse.FAILED, (Header[]) null);
+            response.setErrorMessage(mContext
+                    .getString(R.string.tip_network_unavailable));
             mHandler.obtainMessage(
                     LoopjModelProvider.UPDATE_FAILURE_MESSAGE,
                     new Object[] {
                             ModelProviderListener.RESULT_STATUS_NETOWRK_NOT_AVALIABLE,
-                            ModelProviderListener.FROM_SERVER, null, null })
+                            ModelProviderListener.FROM_SERVER, null, response })
                     .sendToTarget();
             mHandler.obtainMessage(LoopjModelProvider.UPDATE_FINISH_MESSAGE)
                     .sendToTarget();

@@ -2,12 +2,15 @@ package com.limemobile.app.sdk.orm;
 
 import java.util.List;
 
+import org.apache.http.Header;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 
+import com.limemobile.app.sdk.R;
 import com.limemobile.app.sdk.http.BasicJSONResponse;
 import com.limemobile.app.sdk.http.HttpUtils;
 import com.limemobile.app.sdk.http.JSONResponseListener;
@@ -129,12 +132,16 @@ public class VolleyModelProvider<T> {
             return;
         } else {
             if (!isNetworkAvaliable) {
+                BasicJSONResponse response = new BasicJSONResponse(
+                        BasicJSONResponse.FAILED, (Header[]) null);
+                response.setErrorMessage(mContext
+                        .getString(R.string.tip_network_unavailable));
                 mHandler.obtainMessage(
                         QUERY_FAILURE_MESSAGE,
                         new Object[] {
                                 ModelProviderListener.RESULT_STATUS_NETOWRK_NOT_AVALIABLE,
-                                ModelProviderListener.FROM_SERVER, null, null })
-                        .sendToTarget();
+                                ModelProviderListener.FROM_SERVER, null,
+                                response }).sendToTarget();
                 mHandler.obtainMessage(QUERY_FINISH_MESSAGE).sendToTarget();
                 return;
             }
@@ -189,11 +196,15 @@ public class VolleyModelProvider<T> {
         }
 
         if (!HttpUtils.isNetworkAvaliable(mContext)) {
+            BasicJSONResponse response = new BasicJSONResponse(
+                    BasicJSONResponse.FAILED, (Header[]) null);
+            response.setErrorMessage(mContext
+                    .getString(R.string.tip_network_unavailable));
             mHandler.obtainMessage(
                     UPDATE_FAILURE_MESSAGE,
                     new Object[] {
                             ModelProviderListener.RESULT_STATUS_NETOWRK_NOT_AVALIABLE,
-                            ModelProviderListener.FROM_SERVER, null, null })
+                            ModelProviderListener.FROM_SERVER, null, response })
                     .sendToTarget();
             mHandler.obtainMessage(UPDATE_FINISH_MESSAGE).sendToTarget();
             return;

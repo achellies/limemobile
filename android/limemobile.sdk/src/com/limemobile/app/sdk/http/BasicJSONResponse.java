@@ -5,12 +5,11 @@ import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class BasicJSONResponse {
-	public static final int SUCCESS = 0;
-	public static final int FAILED = 1;
+    public static final int SUCCESS = 0;
+    public static final int FAILED = -1;
 
 	protected int mStatusCode;
 	protected final Map<String, String> mHeaders;
