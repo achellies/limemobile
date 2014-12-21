@@ -76,11 +76,13 @@ public class BasicJSONResponse {
 	/**
 	 * Converts Headers[] to Map<String, String>.
 	 */
-	private static Map<String, String> convertHeaders(Header[] headers) {
-		Map<String, String> result = new HashMap<String, String>();
-		for (int i = 0; i < headers.length; i++) {
-			result.put(headers[i].getName(), headers[i].getValue());
-		}
-		return result;
-	}
+    private static Map<String, String> convertHeaders(Header[] headers) {
+        Map<String, String> result = new HashMap<String, String>();
+        if (headers != null) {
+            for (int i = 0; i < headers.length; i++) {
+                result.put(headers[i].getName(), headers[i].getValue());
+            }
+        }
+        return result;
+    }
 }
