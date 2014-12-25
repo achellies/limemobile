@@ -170,6 +170,13 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
 
     @Override
     public void deliverError(VolleyError error) {
+        if (mBasicJSONResponse == null && error != null
+                && error.networkResponse == null) {
+            mBasicJSONResponse = new BasicJSONResponse(
+                    BasicJSONResponse.FAILED, (Header[]) null);
+            mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
+            mBasicJSONResponse.setErrorMessage(error.getMessage());
+        }
         if (mBasicRequest != null
                 && mBasicRequest.getJSONResponseListener() != null
                 && mBasicJSONResponse != null) {
