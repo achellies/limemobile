@@ -191,15 +191,16 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
         Map<String, String> headers = response.headers;
         mBasicJSONResponse = new BasicJSONResponse(statusCode, headers);
 
-        if (headers != null) {
-            if (headers.containsKey(SET_COOKIE_KEY)) {
-                    for (Entry<String, String> header : headers.entrySet()) {
-            if (header.getKey() != null && header.getKey().startWith(SET_COOKIE_KEY)) {
+        if (headers != null && headers.containsKey(SET_COOKIE_KEY)) {
+            for (Entry<String, String> header : headers.entrySet()) {
+                if (header.getKey() != null
+                        && header.getKey().startsWith(SET_COOKIE_KEY)) {
                     String cookieString = header.getValue();
-                if (!TextUtils.isEmpty(cookieString)) {
-                    Cookie cookie = parseRawCookie(cookieString);
-                    if (cookie != null) {
-                        mCookieStore.addCookie(cookie);
+                    if (!TextUtils.isEmpty(cookieString)) {
+                        Cookie cookie = parseRawCookie(cookieString);
+                        if (cookie != null) {
+                            mCookieStore.addCookie(cookie);
+                        }
                     }
                 }
             }
