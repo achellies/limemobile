@@ -193,7 +193,9 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
 
         if (headers != null) {
             if (headers.containsKey(SET_COOKIE_KEY)) {
-                String cookieString = headers.get(SET_COOKIE_KEY);
+                    for (Entry<String, String> header : headers.entrySet()) {
+            if (header.getKey() != null && header.getKey().startWith(SET_COOKIE_KEY)) {
+                    String cookieString = header.getValue();
                 if (!TextUtils.isEmpty(cookieString)) {
                     Cookie cookie = parseRawCookie(cookieString);
                     if (cookie != null) {
