@@ -274,7 +274,7 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
     }
 
     @Override
-    public VolleyError parseNetworkError(VolleyError volleyError) {
+    protected VolleyError parseNetworkError(VolleyError volleyError) {
         if (volleyError.networkResponse == null) {
             mBasicJSONResponse = new BasicJSONResponse(
                     BasicJSONResponse.FAILED, new HashMap<String, String>());
@@ -291,11 +291,58 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
             mBasicJSONResponse = new BasicJSONResponse(
                     volleyError.networkResponse.statusCode,
                     volleyError.networkResponse.headers);
-            mBasicJSONResponse.setErrorMessage(String.format(
-                    "statusCode = %d, response = %s",
-                    volleyError.networkResponse.statusCode, responseString));
+            mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
+            Object result = null;
+            if (!TextUtils.isEmpty(responseString)) {
+                responseString = responseString.trim();
+                if (responseString.startsWith(UTF8_BOM)) {
+                    responseString = responseString.substring(1);
+                }
+                if (responseString.startsWith("{")
+                        || responseString.startsWith("[")) {
+                    try {
+                        result = new JSONTokener(responseString).nextValue();
+                    } catch (JSONException e) {
+                        mBasicJSONResponse
+                                .setErrorCode(BasicJSONResponse.FAILED);
+                        mBasicJSONResponse.setErrorMessage(e.toString());
+                    }
+                }
+            }
+
+            if (result != null) {
+                JSONObject jsonObject = null;
+                if (result instanceof JSONObject) {
+                    jsonObject = (JSONObject) result;
+                    mBasicJSONResponse.setResponseJSONObject(jsonObject);
+                    if (mBasicRequest != null) {
+                        try {
+                            mBasicRequest.parseResponse(mBasicJSONResponse);
+                        } catch (JSONException e) {
+                            mBasicJSONResponse
+                                    .setErrorCode(BasicJSONResponse.FAILED);
+                            mBasicJSONResponse.setErrorMessage(e.toString());
+                        }
+                    }
+                } else if (result instanceof JSONArray) {
+                    mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
+                    mBasicJSONResponse.setErrorMessage(((JSONArray) result)
+                            .toString());
+                } else if (result instanceof String) {
+                    mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
+                    mBasicJSONResponse.setErrorMessage(((String) result));
+                } else {
+                    mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
+                    mBasicJSONResponse.setErrorMessage(result.toString());
+                }
+            } else {
+                mBasicJSONResponse
+                        .setErrorMessage(String.format(
+                                "statusCode = %d, response = %s",
+                                volleyError.networkResponse.statusCode,
+                                responseString));
+            }
         }
-        mBasicJSONResponse.setErrorCode(BasicJSONResponse.FAILED);
         return volleyError;
     }
 
