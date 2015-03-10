@@ -42,6 +42,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.limemobile.app.plugin.PluginClientActivity;
+import com.limemobile.app.plugin.PluginClientApplication;
 import com.limemobile.app.plugin.PluginClientDialogActivity;
 import com.limemobile.app.plugin.PluginClientDialogFragmentActivity;
 import com.limemobile.app.plugin.PluginClientFragmentActivity;

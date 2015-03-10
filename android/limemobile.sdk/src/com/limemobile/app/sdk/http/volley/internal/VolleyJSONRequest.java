@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.http.Header;
@@ -274,7 +275,7 @@ public class VolleyJSONRequest extends Request<JSONObject> implements
     }
 
     @Override
-    protected VolleyError parseNetworkError(VolleyError volleyError) {
+    public VolleyError parseNetworkError(VolleyError volleyError) {
         if (volleyError.networkResponse == null) {
             mBasicJSONResponse = new BasicJSONResponse(
                     BasicJSONResponse.FAILED, new HashMap<String, String>());
